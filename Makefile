@@ -22,6 +22,10 @@ build:: ## Builds the docker image locally
 		--build-arg=https_proxy=$HTTPS_PROXY \
 		-t $(IMAGE_TAG) $(WORKING_DIR)
 
+run:: ## Runs the docker image locally
+		@docker run -it \
+			$(DOCKER_REGISTRY)/$(IMAGE_ORG)/$(IMAGE_NAME):$(IMAGE_VERSION)
+
 # A help target including self-documenting targets (see the awk statement)
 define HELP_TEXT
 Usage: make [TARGET]... [MAKEVAR1=SOMETHING]...
