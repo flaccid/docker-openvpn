@@ -28,6 +28,7 @@ ADD https://raw.githubusercontent.com/outlook/openvpn-azure-ad-auth/master/openv
 RUN cp /usr/share/easy-rsa/vars.example /etc/openvpn/vars && \
     cp /usr/share/easy-rsa/openssl-1.0.cnf /etc/openvpn/openssl-1.0.cnf && \
     ln -s /usr/share/easy-rsa/x509-types /etc/openvpn/x509-types && \
+    chmod +x /usr/local/bin/openvpn-azure-ad-auth.py && \
     rm -f /tmp/requirements.txt
 
 VOLUME ["/etc/openvpn"]
