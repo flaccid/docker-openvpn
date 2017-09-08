@@ -14,7 +14,11 @@ set_conf(){
   # echo "values is $values"
 
   # quick and dirty append for now
-  echo "$directive" "$values" >> "$OPENVPN_CONFIG_FILE"
+  if [ "$directive" = "$values" ]; then
+    echo "$directive" >> "$OPENVPN_CONFIG_FILE"
+  else
+    echo "$directive" "$values" >> "$OPENVPN_CONFIG_FILE"
+  fi
 }
 
 cd /etc/openvpn
@@ -50,7 +54,9 @@ echo '> re-configure openvpn'
 echo '' >> "$OPENVPN_CONFIG_FILE"
 # comment out the extra shared key, we are not that advanced (yet)
 sed -i '/tls-auth ta.key 0/c\;tls-auth ta.key 0' "$OPENVPN_CONFIG_FILE"
-set_conf auth-user-pass-verify /usr/local/bin/openvpn-azure-ad-auth.py via-env
+set_conf auth-user-pass-verify \"openvpn-azure-ad-auth.py --consent\" via-env
+set_conf client-cert-not-required
+set_conf username-as-common-name
 set_conf script-security 3
 
 # uncomment to print out the dir listing
@@ -58,11 +64,17 @@ set_conf script-security 3
 # ls -l /etc/openvpn
 
 [ "$PRINT_OPENVPN_CONFIG" = 'true' ] && cat "$OPENVPN_CONFIG_FILE"
+[ "$PRINT_CA_CERT" = 'true' ] && cat /etc/openvpn/pki/ca.crt
 
 echo "> reconfigure azure-ad config"
-sed -i "s/{{log_level}}/$TENANT_ID/" /etc/azure-ad/config.yaml
-sed -i "s/{{log_level}}/$CLIENT_ID/" /etc/azure-ad/config.yaml
-sed -i "s/{{log_level}}/$HELPER_LOG_LEVEL/" /etc/azure-ad/config.yaml
+sed -i "s/{{tenant_id}}/$TENANT_ID/" /etc/openvpn/config.yaml
+sed -i "s/{{client_id}}/$CLIENT_ID/" /etc/openvpn/config.yaml
+sed -i "s/{{log_level}}/$HELPER_LOG_LEVEL/" /etc/openvpn/config.yaml
+# we also need to make it use hashlib
+sed -i "s/#import hashlib/import hashlib/" /etc/openvpn/openvpn-azure-ad-auth.py
+sed -i "s/#from hmac import compare_digest/from hmac import compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py
+sed -i "s/from backports.pbkdf2 import pbkdf2_hmac, compare_digest/#from backports.pbkdf2 import pbkdf2_hmac, compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py
+sed -i "s/pbkdf2_hmac(/hashlib.pbkdf2_hmac(/" /etc/openvpn/openvpn-azure-ad-auth.py
 
 echo "> openvpn config: $OPENVPN_CONFIG_FILE"
 # print out the full config file if you need debugging purposes
