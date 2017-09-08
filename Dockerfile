@@ -5,6 +5,8 @@ MAINTAINER Chris Fordham <chris@fordham-nagy.id.au>
 ENV OPENVPN_CONFIG_FILE=/etc/openvpn/server.conf
 ENV HELPER_LOG_LEVEL=DEBUG
 ENV PRINT_OPENVPN_CONFIG=false
+ENV PRINT_CA_CERT=false
+ENV DEBUG=false
 
 ADD https://raw.githubusercontent.com/outlook/openvpn-azure-ad-auth/master/requirements.txt /tmp/requirements.txt
 
@@ -14,11 +16,11 @@ RUN apk update && \
     apk add --no-cache --upgrade gcc linux-headers musl-dev libffi-dev openssl-dev openvpn easy-rsa python python-dev py-pip && \
     pip install -r requirements.txt && \
     rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /usr/local/bin /etc/azure-ad
+    mkdir -p /usr/local/bin
 
 COPY entry.sh /usr/local/bin/entry.sh
 
-COPY config.yaml /etc/azure-ad/config.yaml
+COPY config.yaml /etc/openvpn/config.yaml
 
 ADD https://raw.githubusercontent.com/OpenVPN/openvpn/master/sample/sample-config-files/server.conf \
       /etc/openvpn/server.conf
@@ -27,12 +29,12 @@ ADD https://raw.githubusercontent.com/OpenVPN/openvpn/master/sample/sample-confi
       /etc/openvpn/client.conf
 
 ADD https://raw.githubusercontent.com/outlook/openvpn-azure-ad-auth/master/openvpn-azure-ad-auth.py \
-      /usr/local/bin/openvpn-azure-ad-auth.py
+      /etc/openvpn/openvpn-azure-ad-auth.py
 
 RUN cp /usr/share/easy-rsa/vars.example /etc/openvpn/vars && \
     cp /usr/share/easy-rsa/openssl-1.0.cnf /etc/openvpn/openssl-1.0.cnf && \
     ln -s /usr/share/easy-rsa/x509-types /etc/openvpn/x509-types && \
-    chmod +x /usr/local/bin/openvpn-azure-ad-auth.py && \
+    chmod +x /etc/openvpn/openvpn-azure-ad-auth.py && \
     rm -f /tmp/requirements.txt
 
 VOLUME ["/etc/openvpn"]
