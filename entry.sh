@@ -1,5 +1,8 @@
 #!/bin/sh -e
 
+: ${REMOTE_HOST:=127.0.0.1}
+: ${REMOTE_PORT:=1194}
+
 export PATH="$PATH:/usr/share/easy-rsa"
 
 # for azure ad, tenant id and client id are required
@@ -75,6 +78,10 @@ sed -i "s/#import hashlib/import hashlib/" /etc/openvpn/openvpn-azure-ad-auth.py
 sed -i "s/#from hmac import compare_digest/from hmac import compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py
 sed -i "s/from backports.pbkdf2 import pbkdf2_hmac, compare_digest/#from backports.pbkdf2 import pbkdf2_hmac, compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py
 sed -i "s/pbkdf2_hmac(/hashlib.pbkdf2_hmac(/" /etc/openvpn/openvpn-azure-ad-auth.py
+
+echo "> generate client config"
+sed -i "s/remote my-server-1 1194/remote $REMOTE_HOST $REMOTE_PORT/"
+cp /etc/openvpn/client.conf /etc/openvpn/client.ovpn
 
 echo "> openvpn config: $OPENVPN_CONFIG_FILE"
 # print out the full config file if you need debugging purposes
