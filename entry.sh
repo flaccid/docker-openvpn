@@ -26,31 +26,33 @@ set_conf(){
 
 cd /etc/openvpn
 
-echo '> initialising easy-rsa pki'
-easyrsa init-pki
+if [ ! -e 'pki' ]; then
+  echo '> initialising easy-rsa pki'
+  easyrsa init-pki
 
-echo '> generating CA'
-easyrsa --batch build-ca nopass
+  echo '> generating CA'
+  easyrsa --batch build-ca nopass
 
-echo '> generating server pki'
-# can't find a way to do this non-interactive (use build-server-full instead)
-# easyrsa --batch gen-req "$(hostname -s)" nopass
-# easyrsa show-req "$(hostname -s)"
-# interactive only
-# easyrsa sign-req server "$(hostname -s)"
-easyrsa build-server-full "$(hostname -s)" nopass
+  echo '> generating server pki'
+  # can't find a way to do this non-interactive (use build-server-full instead)
+  # easyrsa --batch gen-req "$(hostname -s)" nopass
+  # easyrsa show-req "$(hostname -s)"
+  # interactive only
+  # easyrsa sign-req server "$(hostname -s)"
+  easyrsa build-server-full "$(hostname -s)" nopass
 
-echo '> generating DH params'
-easyrsa gen-dh
+  echo '> generating DH params'
+  easyrsa gen-dh
 
-# echo '> list contents of /etc/openvpn/pki'
-# ls -lahR /etc/openvpn/pki
+  # echo '> list contents of /etc/openvpn/pki'
+  # ls -lahR /etc/openvpn/pki
 
-echo '> linking pki'
-ln -sv /etc/openvpn/pki/ca.crt /etc/openvpn/ca.crt
-ln -sv "/etc/openvpn/pki/issued/$(hostname -s).crt" /etc/openvpn/server.crt
-ln -sv "/etc/openvpn/pki/private/$(hostname -s).key" /etc/openvpn/server.key
-ln -sv /etc/openvpn/pki/dh.pem /etc/openvpn/dh2048.pem
+  echo '> linking pki'
+  ln -sv /etc/openvpn/pki/ca.crt /etc/openvpn/ca.crt
+  ln -sv "/etc/openvpn/pki/issued/$(hostname -s).crt" /etc/openvpn/server.crt
+  ln -sv "/etc/openvpn/pki/private/$(hostname -s).key" /etc/openvpn/server.key
+  ln -sv /etc/openvpn/pki/dh.pem /etc/openvpn/dh2048.pem
+fi
 
 echo '> re-configure openvpn'
 # original file known to not have a trailing return
