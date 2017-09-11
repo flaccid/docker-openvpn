@@ -84,8 +84,12 @@ sed -i "s/pbkdf2_hmac(/hashlib.pbkdf2_hmac(/" /etc/openvpn/openvpn-azure-ad-auth
 echo "> generate client config"
 sed -i "s/remote my-server-1 1194/remote $REMOTE_HOST $REMOTE_PORT/" /etc/openvpn/client.conf
 cp /etc/openvpn/client.conf /etc/openvpn/client.ovpn
+echo "> append CA cert to client config"
+echo '<ca>' >> /etc/openvpn/client.ovpn
+cat /etc/openvpn/pki/ca.crt >> /etc/openvpn/client.ovpn
+echo '</ca>' >> /etc/openvpn/client.ovpn
 
-echo "> openvpn config: $OPENVPN_CONFIG_FILE"
+echo "> openvpn server config: $OPENVPN_CONFIG_FILE"
 # print out the full config file if you need debugging purposes
 # cat "$OPENVPN_CONFIG_FILE"
 
