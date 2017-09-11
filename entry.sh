@@ -80,7 +80,7 @@ sed -i "s/from backports.pbkdf2 import pbkdf2_hmac, compare_digest/#from backpor
 sed -i "s/pbkdf2_hmac(/hashlib.pbkdf2_hmac(/" /etc/openvpn/openvpn-azure-ad-auth.py
 
 echo "> generate client config"
-sed -i "s/remote my-server-1 1194/remote $REMOTE_HOST $REMOTE_PORT/"
+sed -i "s/remote my-server-1 1194/remote $REMOTE_HOST $REMOTE_PORT/" /etc/openvpn/client.conf
 cp /etc/openvpn/client.conf /etc/openvpn/client.ovpn
 
 echo "> openvpn config: $OPENVPN_CONFIG_FILE"
