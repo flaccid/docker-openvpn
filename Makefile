@@ -1,6 +1,6 @@
 DOCKER_REGISTRY = index.docker.io
 IMAGE_NAME = openvpn
-IMAGE_VERSION = latest
+IMAGE_VERSION = azure-ad
 IMAGE_ORG = flaccid
 IMAGE_TAG = $(DOCKER_REGISTRY)/$(IMAGE_ORG)/$(IMAGE_NAME):$(IMAGE_VERSION)
 
@@ -16,6 +16,7 @@ push:: ## Pushes the docker image to the registry
 		@docker push $(IMAGE_TAG)
 
 build:: ## Builds the docker image locally
+		@echo building $(IMAGE_TAG)
 		@docker build --pull \
 		-t $(IMAGE_TAG) $(WORKING_DIR)
 
