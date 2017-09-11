@@ -1,0 +1,16 @@
+version: '2'
+services:
+  openvpn:
+    privileged: true
+    image: flaccid/openvpn
+    environment:
+      CLIENT_ID: ${CLIENT_ID}
+      TENANT_ID: ${TENANT_ID}
+      PRINT_CA_CERT: 'true'
+      PRINT_OPENVPN_CONFIG: 'true'
+    stdin_open: true
+    tty: true
+    ports:
+    - 1194:1194/udp
+    labels:
+      io.rancher.container.pull_image: always
