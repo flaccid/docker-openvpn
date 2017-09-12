@@ -3,6 +3,9 @@
 : ${REMOTE_HOST:=127.0.0.1}
 : ${REMOTE_PORT:=1194}
 
+echo "REMOTE_HOST=$REMOTE_HOST"
+echo "REMOTE_PORT=$REMOTE_PORT"
+
 export PATH="$PATH:/usr/share/easy-rsa"
 
 # for azure ad, tenant id and client id are required
@@ -60,7 +63,7 @@ echo '' >> "$OPENVPN_CONFIG_FILE"
 # comment out the extra shared key, we are not that advanced (yet)
 sed -i '/tls-auth ta.key 0/c\;tls-auth ta.key 0' "$OPENVPN_CONFIG_FILE"
 set_conf auth-user-pass-verify \"openvpn-azure-ad-auth.py --consent\" via-env
-set_conf client-cert-not-required
+set_conf verify-client-cert none
 set_conf username-as-common-name
 set_conf script-security 3
 
@@ -83,11 +86,19 @@ sed -i "s/pbkdf2_hmac(/hashlib.pbkdf2_hmac(/" /etc/openvpn/openvpn-azure-ad-auth
 
 echo "> generate client config"
 sed -i "s/remote my-server-1 1194/remote $REMOTE_HOST $REMOTE_PORT/" /etc/openvpn/client.conf
+echo 'auth-user-pass' >> /etc/openvpn/client.conf
+# cancel out the client pki usage
+sed -i 's/ca ca.crt/;ca ca.crt/' /etc/openvpn/client.conf
+sed -i 's/cert client.crt/;cert client.crt/' /etc/openvpn/client.conf
+sed -i 's/key client.key/;key client.key/' /etc/openvpn/client.conf
+sed -i 's/tls-auth ta.key 1/;tls-auth ta.key 1/' /etc/openvpn/client.conf
+
 cp /etc/openvpn/client.conf /etc/openvpn/client.ovpn
 echo "> append CA cert to client config"
 echo '<ca>' >> /etc/openvpn/client.ovpn
 cat /etc/openvpn/pki/ca.crt >> /etc/openvpn/client.ovpn
 echo '</ca>' >> /etc/openvpn/client.ovpn
+[ "$PRINT_CLIENT_PROFILE" = 'true' ] && cat /etc/openvpn/client.ovpn
 
 echo "> openvpn server config: $OPENVPN_CONFIG_FILE"
 # print out the full config file if you need debugging purposes
