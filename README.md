@@ -19,12 +19,16 @@ NOTE: Not yet minimised privileges - it can vary greatly depending on your Docke
 
     $ docker run -it --privileged flaccid/openvpn
 
-Azure AD usage:
+Practical usage with Azure AD included:
 
     $ docker run -it --privileged \
         -e CLIENT_ID="$CLIENT_ID" \
         -e TENANT_ID="$TENANT_ID" \
-          flaccid/openvpn
+        -e PRINT_CLIENT_PROFILE=true \
+         -p 1194:1194/udp
+          flaccid/openvpn:azure-ad
+
+Once the server is up, copy the printed client profile, save it and run something like `openvpn --config client.ovpn`.
 
 #### Runtime Environment Variables
 
