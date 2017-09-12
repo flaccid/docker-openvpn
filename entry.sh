@@ -2,9 +2,11 @@
 
 : ${REMOTE_HOST:=127.0.0.1}
 : ${REMOTE_PORT:=1194}
+: ${OPENVPN_CONFIG_FILE:=/etc/openvpn/server.conf}
 
 echo "REMOTE_HOST=$REMOTE_HOST"
 echo "REMOTE_PORT=$REMOTE_PORT"
+echo "OPENVPN_CONFIG_FILE=$OPENVPN_CONFIG_FILE"
 
 export PATH="$PATH:/usr/share/easy-rsa"
 
