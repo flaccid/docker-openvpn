@@ -39,6 +39,7 @@ There should be a reasonable amount of flexibility using the available variables
 - `CA_CERTIFICATE` - TLS/SSL CA certificate (x509) [optional]
 - `SERVER_CERTIFICATE` - TLS/SSL server certificate (x509) [optional]
 - `SERVER_KEY` - TLS/SSL server key (x509) [optional]
+- `PUSH_ROUTES` - additional routes to push to clients, e.g. 192.168.0.0 255.255.255.0,10.9.2.0 255.255.255.0 [optional]
 - `PRINT_CLIENT_PROFILE` - print the client .ovpn on startup [optional]
 - `DEBUG` - print out more stuff on startup [optional]
 

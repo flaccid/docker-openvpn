@@ -17,6 +17,7 @@ WORKDIR /tmp
 
 RUN apk update && \
     apk add --no-cache --upgrade \
+      bash \
       gcc \
       linux-headers \
       musl-dev \
