@@ -21,7 +21,12 @@ build:: ## Builds the docker image locally
 		-t $(IMAGE_TAG) $(WORKING_DIR)
 
 run:: ## Runs the docker image locally
-		@docker run -it -e CLIENT_ID=$(CLIENT_ID) -e TENANT_ID=$(TENANT_ID) \
+		@docker run \
+			-it \
+			-p 1194:1194/udp \
+			--privileged \
+			-e CLIENT_ID=$(CLIENT_ID) \
+			-e TENANT_ID=$(TENANT_ID) \
 			$(DOCKER_REGISTRY)/$(IMAGE_ORG)/$(IMAGE_NAME):$(IMAGE_VERSION)
 
 # A help target including self-documenting targets (see the awk statement)
