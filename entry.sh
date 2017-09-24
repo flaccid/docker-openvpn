@@ -53,7 +53,7 @@ else
     mkdir -p /etc/openvpn/pki
   fi
   echo 'saving provided CA certificate to /etc/openvpn/pki/ca.crt'
-  echo "$CA_CERTIFICATE" /etc/openvpn/pki/ca.crt
+  echo "$CA_CERTIFICATE" > /etc/openvpn/pki/ca.crt
 fi
 
 echo '> generating server pki'
