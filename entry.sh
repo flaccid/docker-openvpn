@@ -6,7 +6,7 @@
 
 # for azure ad, tenant id and client id are required
 ([ -z "$TENANT_ID" ] || [ -z "$CLIENT_ID" ]) && \
-  echo '$TENANT_ID and $CLIENT_ID are required environment variables.' && \
+  echo 'TENANT_ID and CLIENT_ID are required environment variables.' && \
   exit 1
 
 echo "REMOTE_HOST=$REMOTE_HOST"
