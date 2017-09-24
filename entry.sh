@@ -57,6 +57,7 @@ else
 fi
 
 echo '> generating server pki'
+[ "$DEBUG" = 'true' ] && ls -l /etc/openvpn/pki
 # can't find a way to do this non-interactive (use build-server-full instead)
 # easyrsa --batch gen-req "$(hostname -s)" nopass
 # easyrsa show-req "$(hostname -s)"
