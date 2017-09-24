@@ -4,6 +4,11 @@
 : ${REMOTE_PORT:=1194}
 : ${OPENVPN_CONFIG_FILE:=/etc/openvpn/server.conf}
 
+# for azure ad, tenant id and client id are required
+([ -z "$TENANT_ID" ] || [ -z "$CLIENT_ID" ]) && \
+  echo '$TENANT_ID and $CLIENT_ID are required environment variables.' && \
+  exit 1
+
 echo "REMOTE_HOST=$REMOTE_HOST"
 echo "REMOTE_PORT=$REMOTE_PORT"
 echo "OPENVPN_CONFIG_FILE=$OPENVPN_CONFIG_FILE"
@@ -11,11 +16,6 @@ echo "CLIENT_ID=$CLIENT_ID"
 echo "TENANT_ID=$TENANT_ID"
 
 export PATH="$PATH:/usr/share/easy-rsa"
-
-# for azure ad, tenant id and client id are required
-([ -z "$TENANT_ID" ] || [ -z "$CLIENT_ID" ]) && \
-  echo '$TENANT_ID and $CLIENT_ID are required environment variables.' && \
-  exit 1
 
 set_conf(){
   directive="$1"
