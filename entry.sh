@@ -43,6 +43,21 @@ if [ -z "$CA_CERTIFICATE" ]; then
   if [ ! -e '/etc/openvpn/pki/ca.crt' ]; then
     echo '> generating CA'
     easyrsa --batch build-ca nopass
+
+    echo '> generating server pki'
+    [ "$DEBUG" = 'true' ] && ls -l /etc/openvpn/pki
+    # can't find a way to do this non-interactive (use build-server-full instead)
+    # easyrsa --batch gen-req "$(hostname -s)" nopass
+    # easyrsa show-req "$(hostname -s)"
+    # interactive only
+    # easyrsa sign-req server "$(hostname -s)"
+    # we're going to full re-generate based on CN-by-host-name atm if we need to
+    # but if the key exists, just skip entirely atm
+    if [ ! -e /etc/openvpn/pki/reqs/$(hostname -s).key ]; then
+      [ -e "/etc/openvpn/pki/reqs/.req" ] && rm "/etc/openvpn/pki/reqs/$(hostname -s).req"
+      echo ">> easyrsa build-server-full $(hostname -s)"
+      easyrsa build-server-full "$(hostname -s)" nopass
+    fi
   else
     echo '> seems you already have a CA at /etc/openvpn/pki/ca.crt'
   fi
@@ -54,21 +69,6 @@ else
   fi
   echo 'saving provided CA certificate to /etc/openvpn/pki/ca.crt'
   echo "$CA_CERTIFICATE" > /etc/openvpn/pki/ca.crt
-fi
-
-echo '> generating server pki'
-[ "$DEBUG" = 'true' ] && ls -l /etc/openvpn/pki
-# can't find a way to do this non-interactive (use build-server-full instead)
-# easyrsa --batch gen-req "$(hostname -s)" nopass
-# easyrsa show-req "$(hostname -s)"
-# interactive only
-# easyrsa sign-req server "$(hostname -s)"
-# we're going to full re-generate based on CN-by-host-name atm if we need to
-# but if the key exists, just skip entirely atm
-if [ ! -e /etc/openvpn/pki/reqs/$(hostname -s).key ]; then
-  [ -e "/etc/openvpn/pki/reqs/.req" ] && rm "/etc/openvpn/pki/reqs/$(hostname -s).req"
-  echo ">> easyrsa build-server-full $(hostname -s)"
-  easyrsa build-server-full "$(hostname -s)" nopass
 fi
 
 echo '> generating DH params'
