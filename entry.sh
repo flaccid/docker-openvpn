@@ -14,6 +14,7 @@ echo "REMOTE_PORT=$REMOTE_PORT"
 echo "OPENVPN_CONFIG_FILE=$OPENVPN_CONFIG_FILE"
 echo "CLIENT_ID=$CLIENT_ID"
 echo "TENANT_ID=$TENANT_ID"
+[ ! -z "$CA_CERTIFICATE" ] && echo "$CA_CERTIFICATE"
 
 export PATH="$PATH:/usr/share/easy-rsa"
 
@@ -46,7 +47,11 @@ if [ -z "$CA_CERTIFICATE" ]; then
     echo '> seems you already have a CA at /etc/openvpn/pki/ca.crt'
   fi
 else
-  sudo mkdir -p /etc/openvpn/pki
+  if [ "$EUID" -ne 0 ]]; then
+    sudo mkdir -p /etc/openvpn/pki
+  else
+    mkdir -p /etc/openvpn/pki
+  fi
   echo 'saving provided CA certificate to /etc/openvpn/pki/ca.crt'
   echo "$CA_CERTIFICATE" /etc/openvpn/pki/ca.crt
 fi
