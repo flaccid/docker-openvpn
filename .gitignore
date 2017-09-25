@@ -3,3 +3,5 @@ client.crt
 client.key
 openvpn.env
 client.conf
+*.pem
+*.key
