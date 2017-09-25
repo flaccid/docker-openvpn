@@ -14,7 +14,10 @@ echo "REMOTE_PORT=$REMOTE_PORT"
 echo "OPENVPN_CONFIG_FILE=$OPENVPN_CONFIG_FILE"
 echo "CLIENT_ID=$CLIENT_ID"
 echo "TENANT_ID=$TENANT_ID"
-[ "$DEBUG" = 'true' ] && [ ! -z "$CA_CERTIFICATE" ] && printf "CA_CERTIFICATE=\n$CA_CERTIFICATE\n"
+if [ "$DEBUG" = 'true' ]; then
+  [ ! -z "$CA_CERTIFICATE" ] && echo "CA_CERTIFICATE=$CA_CERTIFICATE"
+  [ ! -z "$DH_PARAMS" ] && echo "DH_PARAMS=$DH_PARAMS"
+fi
 
 export PATH="$PATH:/usr/share/easy-rsa"
 
@@ -34,11 +37,13 @@ set_conf(){
 
 cd /etc/openvpn
 
+# initialise the pki directory if it doesn't exist
 if [ ! -e 'pki' ]; then
   echo '> initialising easy-rsa pki'
   easyrsa init-pki
 fi
 
+# currently we build all pki including server key and cert if a CA is not provided
 if [ -z "$CA_CERTIFICATE" ]; then
   if [ ! -e '/etc/openvpn/pki/ca.crt' ]; then
     echo '> generating CA'
@@ -69,19 +74,52 @@ else
   fi
   echo 'saving provided CA certificate to /etc/openvpn/pki/ca.crt'
   echo "$CA_CERTIFICATE" > /etc/openvpn/pki/ca.crt
+
+  echo 'saving provided CA key to /etc/openvpn/pki/private/ca.key'
+  echo "$CA_KEY" > /etc/openvpn/pki/private/ca.key
+  chmod 600 /etc/openvpn/pki/private/ca.key
+  ln -svf /etc/openvpn/pki/private/ca.key /etc/openvpn/ca.key
+  cat /etc/openvpn/openssl-1.0.cnf
 fi
 
-echo '> generating DH params'
-easyrsa gen-dh
+# Diffie Hellman parameters
+if [ -z "$DH_PARAMS" ]; then
+  if [ ! -e 'pki/dh.pem' ]; then
+    echo '> generating DH params'
+    easyrsa gen-dh
+    [ "$DEBUG" = 'true' ] && echo '> contents of new dh params' && cat /etc/openvpn/pki/dh.pem
+  fi
+else
+  echo '> storing provided DH params'
+  echo "$DH_PARAMS" > /etc/openvpn/pki/dh.pem
+fi
 
-# echo '> list contents of /etc/openvpn/pki'
-# ls -lahR /etc/openvpn/pki
+echo '01' > /etc/openvpn/pki/serial
+touch /etc/openvpn/pki/index.txt
 
-echo '> linking pki'
-ln -sv /etc/openvpn/pki/ca.crt /etc/openvpn/ca.crt
-ln -sv "/etc/openvpn/pki/issued/$(hostname -s).crt" /etc/openvpn/server.crt
-ln -sv "/etc/openvpn/pki/private/$(hostname -s).key" /etc/openvpn/server.key
-ln -sv /etc/openvpn/pki/dh.pem /etc/openvpn/dh2048.pem
+# regardless, these directories should exist
+mkdir -p /etc/openvpn/pki/issued /etc/openvpn/pki/private /etc/openvpn/pki/certs_by_serial
+
+# server key
+if [ ! -e "/etc/openvpn/pki/private/$(hostname -s).key" ]; then
+  echo '> generating server csr and key'
+  easyrsa gen-req "$(hostname -s)" nopass
+fi
+ln -fsv "/etc/openvpn/pki/private/$(hostname -s).key" /etc/openvpn/server.key
+# server certificate
+if [ ! -e "/etc/openvpn/pki/issued/$(hostname -s).crt" ]; then
+  echo '> generating server certificate'
+  ls -lahR /etc/openvpn
+  #easyrsa import-req "/etc/openvpn/pki/reqs/$(hostname -s).req" "$(hostname -s)"
+  easyrsa sign-req server "$(hostname -s)" nopass
+fi
+
+# index.txt
+#openssl x509 -noout -enddate -serial -subject -in /etc/openvpn/pki/serial \
+#| awk 'BEGIN{FS="=";OFS="\t"} /^serial/{num=$2} /^subject/{sub=$2}
+#    /^notAfter/{split($2,a,/ /);mon=index(months,a[1])/3+1;day=a[2]...exp=sprintf(...)}
+ #   END{print "V",exp,"",num,sub}' >> /etc/openvpn/pki/index.txt
+#ln -sfv /etc/openvpn/pki/index.txt /etc/openvpn/index.txt
 
 echo '> re-configure openvpn server'
 # original file known to not have a trailing return
@@ -105,7 +143,11 @@ fi
 [ "$DEBUG" = 'true' ] && echo '> directory listing of /etc/openvpn' && ls -l /etc/openvpn
 [ "$DEBUG" = 'true' ] && echo '> contents of CA certificate' && cat /etc/openvpn/pki/ca.crt
 
-echo "> reconfigure azure-ad config"
+echo "> reconfigure server"
+#sed -i '/cert server.crt/c\;cert server.crt' /etc/openvpn/server.conf
+#sed -i '/key server.key/c\;key server.key  # This file should be kept secret' /etc/openvpn/server.conf
+
+echo ">> reconfigure azure-ad config"
 sed -i "s/{{tenant_id}}/$TENANT_ID/" /etc/openvpn/config.yaml
 sed -i "s/{{client_id}}/$CLIENT_ID/" /etc/openvpn/config.yaml
 sed -i "s/{{log_level}}/$HELPER_LOG_LEVEL/" /etc/openvpn/config.yaml
@@ -115,7 +157,7 @@ sed -i "s/#from hmac import compare_digest/from hmac import compare_digest/" /et
 sed -i "s/from backports.pbkdf2 import pbkdf2_hmac, compare_digest/#from backports.pbkdf2 import pbkdf2_hmac, compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py
 sed -i "s/pbkdf2_hmac(/hashlib.pbkdf2_hmac(/" /etc/openvpn/openvpn-azure-ad-auth.py
 
-echo "> openvpn server config: $OPENVPN_CONFIG_FILE"
+echo ">> openvpn server config: $OPENVPN_CONFIG_FILE"
 [ "$DEBUG" = 'true' ] && cat /etc/openvpn/server.conf
 
 echo "> reconfigure client config"
@@ -134,5 +176,15 @@ echo '<ca>' >> /etc/openvpn/client.ovpn
 cat /etc/openvpn/pki/ca.crt >> /etc/openvpn/client.ovpn
 echo '</ca>' >> /etc/openvpn/client.ovpn
 [ "$PRINT_CLIENT_PROFILE" = 'true' ] && echo '>> print client profile' && cat /etc/openvpn/client.ovpn
+
+echo '> linking pki'
+ln -fsv "/etc/openvpn/pki/issued/$(hostname -s).crt" /etc/openvpn/server.crt
+ln -fsv "/etc/openvpn/pki/private/$(hostname -s).key" /etc/openvpn/server.key
+ln -fsv /etc/openvpn/pki/dh.pem /etc/openvpn/dh2048.pem
+ln -fsv /etc/openvpn/pki/ca.crt /etc/openvpn/ca.crt
+
+[ "$DEBUG" = 'true' ] && \
+  echo '> list contents of /etc/openvpn/pki' && \
+  ls -lahR /etc/openvpn/pki
 
 echo "> $@" && exec "$@"

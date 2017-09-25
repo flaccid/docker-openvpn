@@ -28,7 +28,32 @@ Practical usage with Azure AD included:
          -p 1194:1194/udp \
           flaccid/openvpn:azure-ad
 
+Persist your existing CA certificate, plus add debug mode:
+
+    $ docker run -it --privileged \
+        -e CLIENT_ID="$CLIENT_ID" \
+        -e TENANT_ID="$TENANT_ID" \
+        -e CA_CERTIFICATE="$CA_CERTIFICATE" \
+        -e DEBUG=true \
+        -e PRINT_CLIENT_PROFILE=true \
+         -p 1194:1194/udp \
+          flaccid/openvpn:azure-ad
+
 Once the server is up, copy the printed client profile, save it and run something like `openvpn --config client.ovpn`.
+
+Full example specifying pre-generated authoritative PKI:
+
+    $ docker run -it --privileged \
+        -e CLIENT_ID="$CLIENT_ID" \
+        -e TENANT_ID="$TENANT_ID" \
+        -e CA_CERTIFICATE="$CA_CERTIFICATE" \
+        -e CA_KEY="$CA_KEY" \
+        -e DH_PARAMS="$DH_PARAMS" \
+        -e REMOTE_HOST="$REMOTE_HOST" \
+        -e PRINT_CLIENT_PROFILE=true \
+        -e DEBUG=true \
+        -p 1194:1194/udp \
+          flaccid/openvpn:azure-ad
 
 #### Runtime Environment Variables
 
@@ -37,6 +62,7 @@ There should be a reasonable amount of flexibility using the available variables
 - `CLIENT_ID` - Azure AD Client ID [required]
 - `TENANT_ID` - Azure AD Tenant ID [required]
 - `CA_CERTIFICATE` - TLS/SSL CA certificate (x509) [optional]
+- `DH_PARAMS` - Diffie hellman parameters (providing them speeds up startup time) [optional]
 - `SERVER_CERTIFICATE` - TLS/SSL server certificate (x509) [optional]
 - `SERVER_KEY` - TLS/SSL server key (x509) [optional]
 - `PUSH_ROUTES` - additional routes to push to clients, e.g. `192.168.0.0 255.255.255.0,10.9.2.0 255.255.255.0` [optional]
