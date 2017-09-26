@@ -151,7 +151,7 @@ sed -i "s/^from backports.pbkdf2 import pbkdf2_hmac, compare_digest/#from backpo
 sed -i "s/(pbkdf2_hmac(/(hashlib.pbkdf2_hmac(/" /etc/openvpn/openvpn-azure-ad-auth.py
 
 echo ">> openvpn server config: $OPENVPN_CONFIG_FILE"
-[ "$DEBUG" = 'true' ] && cat /etc/openvpn/server.conf
+[ "$DEBUG" = 'true' ] && cat -n /etc/openvpn/server.conf
 
 echo "> reconfigure client config"
 sed -i "s/remote my-server-1 1194/remote $REMOTE_HOST $REMOTE_PORT/" /etc/openvpn/client.conf
