@@ -114,13 +114,6 @@ if [ ! -e "/etc/openvpn/pki/issued/$(hostname -s).crt" ]; then
   easyrsa sign-req server "$(hostname -s)" nopass
 fi
 
-# index.txt
-#openssl x509 -noout -enddate -serial -subject -in /etc/openvpn/pki/serial \
-#| awk 'BEGIN{FS="=";OFS="\t"} /^serial/{num=$2} /^subject/{sub=$2}
-#    /^notAfter/{split($2,a,/ /);mon=index(months,a[1])/3+1;day=a[2]...exp=sprintf(...)}
- #   END{print "V",exp,"",num,sub}' >> /etc/openvpn/pki/index.txt
-#ln -sfv /etc/openvpn/pki/index.txt /etc/openvpn/index.txt
-
 echo '> re-configure openvpn server'
 # original file known to not have a trailing return
 echo '' >> "$OPENVPN_CONFIG_FILE"
