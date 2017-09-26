@@ -13,7 +13,15 @@
 
 Azure AD version uses the upstream helper script,  https://github.com/outlook/openvpn-azure-ad-auth.
 
-### Run
+## Build
+
+    $ docker build -t flaccid/openvpn:azure-ad
+
+Or, for RPi:
+
+    $ docker build -t --file Dockerfile.arm32v6 flaccid/openvpn:azure-ad
+
+## Run
 
 NOTE: Not yet minimised privileges - it can vary greatly depending on your Docker setup and OS which is why a privileged container makes sense on the practical level (for now).
 
@@ -55,7 +63,7 @@ Full example specifying pre-generated authoritative PKI:
         -p 1194:1194/udp \
           flaccid/openvpn:azure-ad
 
-#### Runtime Environment Variables
+### Runtime Environment Variables
 
 There should be a reasonable amount of flexibility using the available variables. If not please raise an issue so your use case can be covered!
 
@@ -69,13 +77,13 @@ There should be a reasonable amount of flexibility using the available variables
 - `PRINT_CLIENT_PROFILE` - print the client .ovpn on startup [optional]
 - `DEBUG` - print out more stuff on startup [optional]
 
-#### PKI Persistence
+### PKI Persistence
 
-##### Rancher
+#### Rancher
 
 TODO: Rancher Secrets
 
-##### RightScale
+#### RightScale
 
 Consider just `CA_CERTIFICATE`, `SERVER_CERTIFICATE` and `SERVER_KEY` in RightScale credentials for safe keeping.
 You might copy/paste these when running up the stack via the Rancher Catalog.
