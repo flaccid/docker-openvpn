@@ -147,8 +147,8 @@ sed -i "s/{{log_level}}/$HELPER_LOG_LEVEL/" /etc/openvpn/config.yaml
 # we also need to make it uses hashlib (err m$..)
 sed -i "s/#import hashlib/import hashlib/" /etc/openvpn/openvpn-azure-ad-auth.py
 sed -i "s/#from hmac import compare_digest/from hmac import compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py
-sed -i "s/from backports.pbkdf2 import pbkdf2_hmac, compare_digest/#from backports.pbkdf2 import pbkdf2_hmac, compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py
-sed -i "s/pbkdf2_hmac(/hashlib.pbkdf2_hmac(/" /etc/openvpn/openvpn-azure-ad-auth.py
+sed -i "s/^from backports.pbkdf2 import pbkdf2_hmac, compare_digest/#from backports.pbkdf2 import pbkdf2_hmac, compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py
+sed -i "s/(pbkdf2_hmac(/(hashlib.pbkdf2_hmac(/" /etc/openvpn/openvpn-azure-ad-auth.py
 
 echo ">> openvpn server config: $OPENVPN_CONFIG_FILE"
 [ "$DEBUG" = 'true' ] && cat /etc/openvpn/server.conf
