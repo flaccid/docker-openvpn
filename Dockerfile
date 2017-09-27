@@ -28,6 +28,7 @@ RUN apk update && \
       python \
       python-dev \
       py-pip && \
+      google-authenticator && \
     pip install -r requirements.txt && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p /usr/local/bin
