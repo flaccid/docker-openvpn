@@ -13,19 +13,19 @@
 
 Azure AD version uses the upstream helper script,  https://github.com/outlook/openvpn-azure-ad-auth.
 
-### Prerequisites
+## Prerequisites
 
 You'll need to set up an App Registration in Azure AD.  It only needs the default "Sign in and read user profile" permission.
-Once setup, you can grant permissions in required permissions in the app registration in the portal or run "/etc/openvpn/openvpn-azure-ad-auth.py --consent" inside the container 
+Once setup, you can grant permissions in required permissions in the app registration in the portal or run `/etc/openvpn/openvpn-azure-ad-auth.py --consent` inside the container
 The grant/consent can be done per user or by an admin to consent for all users.
 
 ## Build
 
-    $ docker build -t flaccid/openvpn:azure-ad
+    $ docker build -t flaccid/openvpn:azure-ad .
 
 Or, for RPi:
 
-    $ docker build -t --file Dockerfile.arm32v6 flaccid/openvpn:azure-ad
+    $ docker build --file Dockerfile.arm32v6 -t flaccid/openvpn:azure-ad .
 
 ## Run
 
