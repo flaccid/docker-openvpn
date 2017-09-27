@@ -13,6 +13,12 @@
 
 Azure AD version uses the upstream helper script,  https://github.com/outlook/openvpn-azure-ad-auth.
 
+## Prerequisites
+
+You'll need to set up an App Registration in Azure AD.  It only needs the default "Sign in and read user profile" permission.
+Once setup, you can grant permissions in required permissions in the app registration in the portal or run "/etc/openvpn/openvpn-azure-ad-auth.py --consent" inside the container 
+The grant/consent can be done per user or by an admin to consent for all users.
+
 ## Build
 
     $ docker build -t flaccid/openvpn:azure-ad
@@ -76,6 +82,7 @@ There should be a reasonable amount of flexibility using the available variables
 - `PUSH_ROUTES` - additional routes to push to clients, e.g. `192.168.0.0 255.255.255.0,10.9.2.0 255.255.255.0` [optional]
 - `PRINT_CLIENT_PROFILE` - print the client .ovpn on startup [optional]
 - `DEBUG` - print out more stuff on startup [optional]
+- `NAT` - set to `true` to enable Network Address Translation on the OpenVPN server to masquerade traffic out of the host [optional]
 
 ### PKI Persistence
 
