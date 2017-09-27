@@ -103,7 +103,7 @@ mkdir -p /etc/openvpn/pki/issued /etc/openvpn/pki/private /etc/openvpn/pki/certs
 # server key
 if [ ! -e "/etc/openvpn/pki/private/$(hostname -s).key" ]; then
   echo '> generating server csr and key'
-  easyrsa gen-req "$(hostname -s)" nopass
+  easyrsa --batch gen-req "$(hostname -s)" nopass
 fi
 ln -fsv "/etc/openvpn/pki/private/$(hostname -s).key" /etc/openvpn/server.key
 # server certificate
@@ -111,7 +111,7 @@ if [ ! -e "/etc/openvpn/pki/issued/$(hostname -s).crt" ]; then
   echo '> generating server certificate'
   ls -lahR /etc/openvpn
   #easyrsa import-req "/etc/openvpn/pki/reqs/$(hostname -s).req" "$(hostname -s)"
-  easyrsa sign-req server "$(hostname -s)" nopass
+  easyrsa --batch sign-req server "$(hostname -s)" nopass
 fi
 
 # index.txt
@@ -126,7 +126,7 @@ echo '> re-configure openvpn server'
 echo '' >> "$OPENVPN_CONFIG_FILE"
 # comment out the extra shared key, we are not that advanced (yet)
 sed -i '/tls-auth ta.key 0/c\;tls-auth ta.key 0' "$OPENVPN_CONFIG_FILE"
-set_conf auth-user-pass-verify \"openvpn-azure-ad-auth.py --consent\" via-env
+set_conf auth-user-pass-verify openvpn-azure-ad-auth.py via-env
 set_conf verify-client-cert none
 set_conf username-as-common-name
 set_conf script-security 3
@@ -136,7 +136,7 @@ if [ ! -z "$PUSH_ROUTES" ]; then
   IFS=',' read -ra routes <<< "$PUSH_ROUTES"
   for route in "${routes[@]}"; do
     echo ">>> $route"
-    set_conf push route \""$route"\"
+    set_conf push \"route "$route"\"
   done
 fi
 
@@ -186,5 +186,12 @@ ln -fsv /etc/openvpn/pki/ca.crt /etc/openvpn/ca.crt
 [ "$DEBUG" = 'true' ] && \
   echo '> list contents of /etc/openvpn/pki' && \
   ls -lahR /etc/openvpn/pki
+
+# Setup NAT if needed
+if [ "$NAT_ENABLE" = 'true' ]; then
+  net=$(awk '/^server/ {print $2"/"$3}' ${OPENVPN_CONFIG_FILE})
+  eth=$(ip route | awk '/^default/ {print $5}')
+  iptables -t nat -A POSTROUTING -s ${net} -o ${eth} -j MASQUERADE
+fi
 
 echo "> $@" && exec "$@"
