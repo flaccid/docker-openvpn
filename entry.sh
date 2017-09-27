@@ -22,16 +22,10 @@ fi
 export PATH="$PATH:/usr/share/easy-rsa"
 
 set_conf(){
-  directive="$1"
-  values="$(echo $@ | cut -d ' ' -f 2,3,4,5)"
-  # echo "directive is $directive"
-  # echo "values is $values"
-
-  # quick and dirty append for now
-  if [ "$directive" = "$values" ]; then
-    echo "$directive" >> "$OPENVPN_CONFIG_FILE"
-  else
-    echo "$directive" "$values" >> "$OPENVPN_CONFIG_FILE"
+  # Really basic check and append.  This doesn't cater for directives that should only be set once
+  # But it covers directives that can be set multiple times with different value
+  if ! grep "^$1" "$OPENVPN_CONFIG_FILE"; then
+    echo "$1" >> "$OPENVPN_CONFIG_FILE"
   fi
 }
 
@@ -119,17 +113,17 @@ echo '> re-configure openvpn server'
 echo '' >> "$OPENVPN_CONFIG_FILE"
 # comment out the extra shared key, we are not that advanced (yet)
 sed -i '/tls-auth ta.key 0/c\;tls-auth ta.key 0' "$OPENVPN_CONFIG_FILE"
-set_conf auth-user-pass-verify openvpn-azure-ad-auth.py via-env
-set_conf verify-client-cert none
-set_conf username-as-common-name
-set_conf script-security 3
+set_conf "auth-user-pass-verify openvpn-azure-ad-auth.py via-env"
+set_conf "verify-client-cert none"
+set_conf "username-as-common-name"
+set_conf "script-security 3"
 
-if [ ! -z "$PUSH_ROUTES" ]; then
-  echo '>> adding push routes'
-  IFS=',' read -ra routes <<< "$PUSH_ROUTES"
-  for route in "${routes[@]}"; do
-    echo ">>> $route"
-    set_conf push \"route "$route"\"
+if [ ! -z "$PUSH_OPTIONS" ]; then
+  echo '>> adding push options'
+  IFS=',' read -ra options <<< "$PUSH_OPTIONS"
+  for option in "${options[@]}"; do
+    echo ">>> $option"
+    set_conf "push \"$option\""
   done
 fi
 

@@ -79,7 +79,7 @@ There should be a reasonable amount of flexibility using the available variables
 - `DH_PARAMS` - Diffie hellman parameters (providing them speeds up startup time) [optional]
 - `SERVER_CERTIFICATE` - TLS/SSL server certificate (x509) [optional]
 - `SERVER_KEY` - TLS/SSL server key (x509) [optional]
-- `PUSH_ROUTES` - additional routes to push to clients, e.g. `192.168.0.0 255.255.255.0,10.9.2.0 255.255.255.0` [optional]
+- `PUSH_OPTIONS` - additional options to push to clients, e.g. `route 10.0.0.0 255.255.255.0,dhcp-option DNS 10.0.0.5` [optional]
 - `PRINT_CLIENT_PROFILE` - print the client .ovpn on startup [optional]
 - `DEBUG` - print out more stuff on startup [optional]
 - `NAT` - set to `true` to enable Network Address Translation on the OpenVPN server to masquerade traffic out of the host [optional]

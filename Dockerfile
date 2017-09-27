@@ -27,7 +27,7 @@ RUN apk update && \
       easy-rsa \
       python \
       python-dev \
-      py-pip && \
+      py-pip \
       google-authenticator && \
     pip install -r requirements.txt && \
     rm -rf /var/lib/apt/lists/* && \
