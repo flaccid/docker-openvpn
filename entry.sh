@@ -14,6 +14,7 @@ echo "REMOTE_PORT=$REMOTE_PORT"
 echo "OPENVPN_CONFIG_FILE=$OPENVPN_CONFIG_FILE"
 echo "CLIENT_ID=$CLIENT_ID"
 echo "TENANT_ID=$TENANT_ID"
+echo "AD_GOUPS=$AD_GROUPS"
 if [ "$DEBUG" = 'true' ]; then
   [ ! -z "$CA_CERTIFICATE" ] && echo "CA_CERTIFICATE=$CA_CERTIFICATE"
   [ ! -z "$DH_PARAMS" ] && echo "DH_PARAMS=$DH_PARAMS"
@@ -138,6 +139,14 @@ echo ">> reconfigure azure-ad config"
 sed -i "s/{{tenant_id}}/$TENANT_ID/" /etc/openvpn/config.yaml
 sed -i "s/{{client_id}}/$CLIENT_ID/" /etc/openvpn/config.yaml
 sed -i "s/{{log_level}}/$HELPER_LOG_LEVEL/" /etc/openvpn/config.yaml
+if [ ! -z "$AD_GROUPS" ]; then
+  grep -q "^permitted_groups:" /etc/openvpn/config.yaml || echo "permitted_groups:" >> /etc/openvpn/config.yaml
+  IFS=',' read -ra groups <<< "$AD_GROUPS"
+  for group in "${groups[@]}"; do
+    echo ">>> Adding group access for '$group'"
+    grep -q -- "- $group" /etc/openvpn/config.yaml || sed -i -e "/^permitted_groups:/a \  - $group" /etc/openvpn/config.yaml
+  done
+fi
 # we also need to make it uses hashlib (err m$..)
 sed -i "s/#import hashlib/import hashlib/" /etc/openvpn/openvpn-azure-ad-auth.py
 sed -i "s/#from hmac import compare_digest/from hmac import compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py

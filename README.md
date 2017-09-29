@@ -15,9 +15,10 @@ Azure AD version uses the upstream helper script,  https://github.com/outlook/op
 
 ## Prerequisites
 
-You'll need to set up an App Registration in Azure AD.  It only needs the default "Sign in and read user profile" permission.
+You'll need to set up an App Registration in Azure AD.  It only needs the default "Sign in and read user profile" permission for standard authentication.
 Once setup, you can grant permissions in required permissions in the app registration in the portal or run `/etc/openvpn/openvpn-azure-ad-auth.py --consent` inside the container
 The grant/consent can be done per user or by an admin to consent for all users.
+If you want to make use of $AD_GROUPS for access control, the App Registration will also need "Read all groups" access and to have an admin Grant Permissions for it.
 
 ## Build
 
@@ -75,6 +76,7 @@ There should be a reasonable amount of flexibility using the available variables
 
 - `CLIENT_ID` - Azure AD Client ID [required]
 - `TENANT_ID` - Azure AD Tenant ID [required]
+- `AD_GROUPS` - Comma separated list of Azure AD groups to permit access to (requires app registration to have 'read all groups' access [optional]
 - `CA_CERTIFICATE` - TLS/SSL CA certificate (x509) [optional]
 - `DH_PARAMS` - Diffie hellman parameters (providing them speeds up startup time) [optional]
 - `SERVER_CERTIFICATE` - TLS/SSL server certificate (x509) [optional]
