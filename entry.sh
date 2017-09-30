@@ -14,6 +14,7 @@ echo "REMOTE_PORT=$REMOTE_PORT"
 echo "OPENVPN_CONFIG_FILE=$OPENVPN_CONFIG_FILE"
 echo "CLIENT_ID=$CLIENT_ID"
 echo "TENANT_ID=$TENANT_ID"
+echo "AD_GOUPS=$AD_GROUPS"
 if [ "$DEBUG" = 'true' ]; then
   [ ! -z "$CA_CERTIFICATE" ] && echo "CA_CERTIFICATE=$CA_CERTIFICATE"
   [ ! -z "$DH_PARAMS" ] && echo "DH_PARAMS=$DH_PARAMS"
@@ -22,16 +23,10 @@ fi
 export PATH="$PATH:/usr/share/easy-rsa"
 
 set_conf(){
-  directive="$1"
-  values="$(echo $@ | cut -d ' ' -f 2,3,4,5)"
-  # echo "directive is $directive"
-  # echo "values is $values"
-
-  # quick and dirty append for now
-  if [ "$directive" = "$values" ]; then
-    echo "$directive" >> "$OPENVPN_CONFIG_FILE"
-  else
-    echo "$directive" "$values" >> "$OPENVPN_CONFIG_FILE"
+  # Really basic check and append.  This doesn't cater for directives that should only be set once
+  # But it covers directives that can be set multiple times with different value
+  if ! grep "^$1" "$OPENVPN_CONFIG_FILE"; then
+    echo "$1" >> "$OPENVPN_CONFIG_FILE"
   fi
 }
 
@@ -119,17 +114,17 @@ echo '> re-configure openvpn server'
 echo '' >> "$OPENVPN_CONFIG_FILE"
 # comment out the extra shared key, we are not that advanced (yet)
 sed -i '/tls-auth ta.key 0/c\;tls-auth ta.key 0' "$OPENVPN_CONFIG_FILE"
-set_conf auth-user-pass-verify openvpn-azure-ad-auth.py via-env
-set_conf verify-client-cert none
-set_conf username-as-common-name
-set_conf script-security 3
+set_conf "auth-user-pass-verify openvpn-azure-ad-auth.py via-env"
+set_conf "verify-client-cert none"
+set_conf "username-as-common-name"
+set_conf "script-security 3"
 
-if [ ! -z "$PUSH_ROUTES" ]; then
-  echo '>> adding push routes'
-  IFS=',' read -ra routes <<< "$PUSH_ROUTES"
-  for route in "${routes[@]}"; do
-    echo ">>> $route"
-    set_conf push \"route "$route"\"
+if [ ! -z "$PUSH_OPTIONS" ]; then
+  echo '>> adding push options'
+  IFS=',' read -ra options <<< "$PUSH_OPTIONS"
+  for option in "${options[@]}"; do
+    echo ">>> $option"
+    set_conf "push \"$option\""
   done
 fi
 
@@ -144,6 +139,14 @@ echo ">> reconfigure azure-ad config"
 sed -i "s/{{tenant_id}}/$TENANT_ID/" /etc/openvpn/config.yaml
 sed -i "s/{{client_id}}/$CLIENT_ID/" /etc/openvpn/config.yaml
 sed -i "s/{{log_level}}/$HELPER_LOG_LEVEL/" /etc/openvpn/config.yaml
+if [ ! -z "$AD_GROUPS" ]; then
+  grep -q "^permitted_groups:" /etc/openvpn/config.yaml || echo "permitted_groups:" >> /etc/openvpn/config.yaml
+  IFS=',' read -ra groups <<< "$AD_GROUPS"
+  for group in "${groups[@]}"; do
+    echo ">>> Adding group access for '$group'"
+    grep -q -- "- $group" /etc/openvpn/config.yaml || sed -i -e "/^permitted_groups:/a \  - $group" /etc/openvpn/config.yaml
+  done
+fi
 # we also need to make it uses hashlib (err m$..)
 sed -i "s/#import hashlib/import hashlib/" /etc/openvpn/openvpn-azure-ad-auth.py
 sed -i "s/#from hmac import compare_digest/from hmac import compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py
