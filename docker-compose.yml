@@ -4,8 +4,9 @@ services:
     privileged: true
     image: flaccid/openvpn
     environment:
-      CLIENT_ID: ${CLIENT_ID}
-      TENANT_ID: ${TENANT_ID}
+      AUTH_TYPE: azuread
+      AZUREAD_CLIENT_ID: ${CLIENT_ID}
+      AZUREAD_TENANT_ID: ${TENANT_ID}
       PRINT_CA_CERT: 'true'
       PRINT_OPENVPN_CONFIG: 'true'
     stdin_open: true

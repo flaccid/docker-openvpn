@@ -24,6 +24,8 @@ RUN apk update && \
       libffi-dev \
       openssl-dev \
       openvpn \
+      openvpn-ad-check \
+      lua \
       easy-rsa \
       python \
       python-dev \

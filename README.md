@@ -11,14 +11,34 @@
 
 :whale: A Docker image for OpenVPN.
 
-Azure AD version uses the upstream helper script,  https://github.com/outlook/openvpn-azure-ad-auth.
+Allows different types of authentication to be used:
 
-## Prerequisites
+### azuread
+
+Azure AD version uses the upstream helper script,  https://github.com/outlook/openvpn-azure-ad-auth.
 
 You'll need to set up an App Registration in Azure AD.  It only needs the default "Sign in and read user profile" permission for standard authentication.
 Once setup, you can grant permissions in required permissions in the app registration in the portal or run `/etc/openvpn/openvpn-azure-ad-auth.py --consent` inside the container
 The grant/consent can be done per user or by an admin to consent for all users.
-If you want to make use of $AD_GROUPS for access control, the App Registration will also need "Read all groups" access and to have an admin Grant Permissions for it.
+If you want to make use of $AUTH_GROUPS for access control, the App Registration will also need "Read all groups" access and to have an admin Grant Permissions for it.
+
+Required runtime environments:
+- `AZUREAD_CLIENT_ID` - Azure AD Client ID [required]
+- `AZUREAD_TENANT_ID` - Azure AD Tenant ID [required]
+Optional runtime environments:
+- `AZUREAD_GROUPS` - Comma separated list of Azure AD groups to permit access to (requires app registration to have 'read all groups' access [optional]
+
+### adcheck
+
+ADCheck uses the openvpn-ad-check LUA project, https://sourceforge.net/projects/openvpnadcheck/
+
+This will authenticate the user and password passed from the client to the AD server and then check that the user is a member of $DCHECK_GROUPDN.  ADCHECK_GROUPDN
+needs to be in LDAP format, ie "CN=Some Group,OU=Global Groups,OU=Group Objects,DC=somewhere,DC=com"
+
+Required runtime environments:
+- `ADCHECK_SERVER` - AD Server [required]
+- `ADCHECK_DOMAIN` - AD Domain [required]
+- `ADCHECK_GROUPDN` - AD Group LDAP DN [required]
 
 ## Build
 
@@ -34,11 +54,23 @@ NOTE: Not yet minimised privileges - it can vary greatly depending on your Docke
 
     $ docker run -it --privileged flaccid/openvpn
 
-Practical usage with Azure AD included:
+Practical usage with authentication against Azure AD:
 
     $ docker run -it --privileged \
-        -e CLIENT_ID="$CLIENT_ID" \
-        -e TENANT_ID="$TENANT_ID" \
+        -e AUTH_TYPE="azuread" \
+        -e AZUREAD_CLIENT_ID="$CLIENT_ID" \
+        -e AZUREAD_TENANT_ID="$TENANT_ID" \
+        -e PRINT_CLIENT_PROFILE=true \
+         -p 1194:1194/udp \
+          flaccid/openvpn:azure-ad
+
+Use adcheck for authentication against AD:
+
+    $ docker run -it --privileged \
+        -e AUTH_TYPE="adcheck" \
+        -e ADCHECK_SERVER="$AD_SERVER" \
+        -e ADCHECK_DOMAIN="$AD_DOMAIN" \
+        -e ADCHECK_GROUPDN="$AD_GROUP" \
         -e PRINT_CLIENT_PROFILE=true \
          -p 1194:1194/udp \
           flaccid/openvpn:azure-ad
@@ -46,8 +78,9 @@ Practical usage with Azure AD included:
 Persist your existing CA certificate, plus add debug mode:
 
     $ docker run -it --privileged \
-        -e CLIENT_ID="$CLIENT_ID" \
-        -e TENANT_ID="$TENANT_ID" \
+        -e AUTH_TYPE="azuread" \
+        -e AZUREAD_CLIENT_ID="$CLIENT_ID" \
+        -e AZUREAD_TENANT_ID="$TENANT_ID" \
         -e CA_CERTIFICATE="$CA_CERTIFICATE" \
         -e DEBUG=true \
         -e PRINT_CLIENT_PROFILE=true \
@@ -59,8 +92,9 @@ Once the server is up, copy the printed client profile, save it and run somethin
 Full example specifying pre-generated authoritative PKI:
 
     $ docker run -it --privileged \
-        -e CLIENT_ID="$CLIENT_ID" \
-        -e TENANT_ID="$TENANT_ID" \
+        -e AUTH_TYPE="azuread" \
+        -e AZUREAD_CLIENT_ID="$CLIENT_ID" \
+        -e AZUREAD_TENANT_ID="$TENANT_ID" \
         -e CA_CERTIFICATE="$CA_CERTIFICATE" \
         -e CA_KEY="$CA_KEY" \
         -e DH_PARAMS="$DH_PARAMS" \
@@ -74,9 +108,7 @@ Full example specifying pre-generated authoritative PKI:
 
 There should be a reasonable amount of flexibility using the available variables. If not please raise an issue so your use case can be covered!
 
-- `CLIENT_ID` - Azure AD Client ID [required]
-- `TENANT_ID` - Azure AD Tenant ID [required]
-- `AD_GROUPS` - Comma separated list of Azure AD groups to permit access to (requires app registration to have 'read all groups' access [optional]
+- `AUTH_TYPE` - Type of auth to use (azuread, or adcheck) [required]
 - `CA_CERTIFICATE` - TLS/SSL CA certificate (x509) [optional]
 - `DH_PARAMS` - Diffie hellman parameters (providing them speeds up startup time) [optional]
 - `SERVER_CERTIFICATE` - TLS/SSL server certificate (x509) [optional]
@@ -85,6 +117,12 @@ There should be a reasonable amount of flexibility using the available variables
 - `PRINT_CLIENT_PROFILE` - print the client .ovpn on startup [optional]
 - `DEBUG` - print out more stuff on startup [optional]
 - `NAT` - set to `true` to enable Network Address Translation on the OpenVPN server to masquerade traffic out of the host [optional]
+- `AZUREAD_CLIENT_ID` - Azure AD Client ID [required for azuread auth]
+- `AZUREAD_TENANT_ID` - Azure AD Tenant ID [required for azuread auth]
+- `AZUREAD_GROUPS` - Comma separated list of Azure AD groups to permit access to (requires app registration to have 'read all groups' access [optional for azuread auth]
+- `ADCHECK_SERVER` - AD Server [required for adcheck auth]
+- `ADCHECK_DOMAIN` - AD Domain [required for adcheck auth]
+- `ADCHECK_GROUPDN` - AD Group LDAP DN [required for adcheck auth]
 
 ### PKI Persistence
 
