@@ -32,8 +32,9 @@ Optional runtime environments:
 
 ADCheck uses the openvpn-ad-check LUA project, https://sourceforge.net/projects/openvpnadcheck/
 
-This will authenticate the user and password passed from the client to the AD server and then check that the user is a member of $DCHECK_GROUPDN.  ADCHECK_GROUPDN
-needs to be in LDAP format, ie "CN=Some Group,OU=Global Groups,OU=Group Objects,DC=somewhere,DC=com"
+This will authenticate the user and password passed from the client to the AD server and then check that the user is a member of $ADCHECK_GROUPDN.  ADCHECK_GROUPDN
+needs to be in LDAP format, ie "CN=Some Group,OU=Global Groups,OU=Group Objects,DC=somewhere,DC=com".  ADCHECK_DOMAIN is the domain to log in to.  Users should then login
+using just their account name without domain.
 
 Required runtime environments:
 - `ADCHECK_SERVER` - AD Server [required]
