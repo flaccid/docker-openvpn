@@ -114,6 +114,8 @@ case $AUTH_TYPE in
   adcheck)
     set_conf "auth-user-pass-verify openvpnadcheck.lua via-env"
     set_conf "script-security 3"
+    mkdir -p /etc/ssl/certs/
+    [ -n "$ADCHECK_SERVER_CACERT" ] && echo "$ADCHECK_SERVER_CACERT" > /etc/ssl/certs/ldap_server.pem
     echo ">> reconfigure openvpnadcheck config"
     sed -i "s|\(AD_server=\).*|\1\"$ADCHECK_SERVER\"|" /etc/openvpn/openvpnadcheck.conf
     sed -i "s|\(AD_domain=\).*|\1\"$ADCHECK_DOMAIN\"|" /etc/openvpn/openvpnadcheck.conf

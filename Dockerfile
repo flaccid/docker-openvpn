@@ -20,6 +20,7 @@ RUN apk update && \
       bash \
       openvpn \
       openvpn-ad-check \
+      ca-certificates \
       lua \
       easy-rsa \
       python \
