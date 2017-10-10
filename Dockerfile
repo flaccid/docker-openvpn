@@ -18,22 +18,39 @@ WORKDIR /tmp
 RUN apk update && \
     apk add --no-cache --upgrade \
       bash \
-      gcc \
-      linux-headers \
-      musl-dev \
-      libffi-dev \
-      openssl-dev \
       openvpn \
       openvpn-ad-check \
       lua \
       easy-rsa \
       python \
-      python-dev \
-      py-pip \
       google-authenticator && \
+    apk add --no-cache --virtual .build-deps \
+      gcc \
+      linux-headers \
+      musl-dev \
+      libffi-dev \
+      openssl-dev \
+      python-dev \
+      py-pip && \
     pip install -r requirements.txt && \
-    rm -rf /var/lib/apt/lists/* && \
+    apk del .build-deps && \
+    rm -rf /var/cache/apk/* && \
     mkdir -p /usr/local/bin
+
+RUN apk add --no-cache --virtual .build-deps \
+      autoconf \
+      g++ \
+      make \
+      openldap-dev \
+      lua-dev \
+      git && \
+    git clone https://git.zx2c4.com/lualdap && \
+    (cd lualdap && make) && \
+    cp lualdap/lualdap.so /usr/lib/lua/5.1/lualdap.so && \
+    rm -rf lualdap && \
+    sed -i -e 's/^local ld .*/local ld = assert (lualdap.open_simple { uri = AD_server, who = os.getenv("username").."@"..AD_domain, password = os.getenv("password") })/' \
+        /etc/openvpn/openvpnadcheck.lua && \
+    apk del .build-deps
 
 COPY entry.sh /usr/local/bin/entry.sh
 

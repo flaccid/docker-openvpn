@@ -37,7 +37,7 @@ needs to be in LDAP format, ie "CN=Some Group,OU=Global Groups,OU=Group Objects,
 using just their account name without domain.
 
 Required runtime environments:
-- `ADCHECK_SERVER` - AD Server [required]
+- `ADCHECK_SERVER` - AD Server (ldap://<server>) [required]
 - `ADCHECK_DOMAIN` - AD Domain [required]
 - `ADCHECK_GROUPDN` - AD Group LDAP DN [required]
 
