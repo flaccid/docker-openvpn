@@ -3,18 +3,12 @@
 : ${REMOTE_HOST:=127.0.0.1}
 : ${REMOTE_PORT:=1194}
 : ${OPENVPN_CONFIG_FILE:=/etc/openvpn/server.conf}
-
-# for azure ad, tenant id and client id are required
-([ -z "$TENANT_ID" ] || [ -z "$CLIENT_ID" ]) && \
-  echo 'TENANT_ID and CLIENT_ID are required environment variables.' && \
-  exit 1
+: ${AUTH_TYPE:=none}
 
 echo "REMOTE_HOST=$REMOTE_HOST"
 echo "REMOTE_PORT=$REMOTE_PORT"
 echo "OPENVPN_CONFIG_FILE=$OPENVPN_CONFIG_FILE"
-echo "CLIENT_ID=$CLIENT_ID"
-echo "TENANT_ID=$TENANT_ID"
-echo "AD_GOUPS=$AD_GROUPS"
+echo "AUTH_TYPE=$AUTH_TYPE"
 if [ "$DEBUG" = 'true' ]; then
   [ ! -z "$CA_CERTIFICATE" ] && echo "CA_CERTIFICATE=$CA_CERTIFICATE"
   [ ! -z "$DH_PARAMS" ] && echo "DH_PARAMS=$DH_PARAMS"
@@ -114,10 +108,49 @@ echo '> re-configure openvpn server'
 echo '' >> "$OPENVPN_CONFIG_FILE"
 # comment out the extra shared key, we are not that advanced (yet)
 sed -i '/tls-auth ta.key 0/c\;tls-auth ta.key 0' "$OPENVPN_CONFIG_FILE"
-set_conf "auth-user-pass-verify openvpn-azure-ad-auth.py via-env"
+
+# Auth specific settings
+case $AUTH_TYPE in
+  adcheck)
+    set_conf "auth-user-pass-verify openvpnadcheck.lua via-env"
+    set_conf "script-security 3"
+    mkdir -p /etc/ssl/certs/
+    [ -n "$ADCHECK_SERVER_CACERT" ] && echo "$ADCHECK_SERVER_CACERT" > /etc/ssl/certs/ldap_server.pem
+    echo ">> reconfigure openvpnadcheck config"
+    sed -i "s|\(AD_server=\).*|\1\"$ADCHECK_SERVER\"|" /etc/openvpn/openvpnadcheck.conf
+    sed -i "s|\(AD_domain=\).*|\1\"$ADCHECK_DOMAIN\"|" /etc/openvpn/openvpnadcheck.conf
+    sed -i "s|\(AD_dn=\).*|\1\"$ADCHECK_GROUPDN\"|" /etc/openvpn/openvpnadcheck.conf
+    # Update openvpnadcheck.lua to use the user container name instead of the sAMAccountName
+    sed -i -e 's|sAMAccountName|cn|g' /etc/openvpn/openvpnadcheck.lua
+    ;;
+  azuread)
+    ([ -z "$AZUREAD_TENANT_ID" ] || [ -z "$AZUREAD_CLIENT_ID" ]) && \
+      echo 'AZUREAD_TENANT_ID and AZUREAD_CLIENT_ID are required environment variables.' && \
+      exit 1
+    set_conf "auth-user-pass-verify openvpn-azure-ad-auth.py via-env"
+    set_conf "script-security 3"
+    echo ">> reconfigure azure-ad config"
+    sed -i "s/{{tenant_id}}/$AZUREAD_TENANT_ID/" /etc/openvpn/config.yaml
+    sed -i "s/{{client_id}}/$AZUREAD_CLIENT_ID/" /etc/openvpn/config.yaml
+    sed -i "s/{{log_level}}/$HELPER_LOG_LEVEL/" /etc/openvpn/config.yaml
+    if [ ! -z "$AZUREAD_GROUPS" ]; then
+      grep -q "^permitted_groups:" /etc/openvpn/config.yaml || echo "permitted_groups:" >> /etc/openvpn/config.yaml
+      IFS=',' read -ra groups <<< "$AZUREAD_GROUPS"
+      for group in "${groups[@]}"; do
+        echo ">>> Adding group access for '$group'"
+        grep -q -- "- $group" /etc/openvpn/config.yaml || sed -i -e "/^permitted_groups:/a \  - $group" /etc/openvpn/config.yaml
+      done
+    fi
+    # we also need to make it uses hashlib (err m$..)
+    sed -i "s/#import hashlib/import hashlib/" /etc/openvpn/openvpn-azure-ad-auth.py
+    sed -i "s/#from hmac import compare_digest/from hmac import compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py
+    sed -i "s/^from backports.pbkdf2 import pbkdf2_hmac, compare_digest/#from backports.pbkdf2 import pbkdf2_hmac, compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py
+    sed -i "s/(pbkdf2_hmac(/(hashlib.pbkdf2_hmac(/" /etc/openvpn/openvpn-azure-ad-auth.py
+    ;;
+esac
+
 set_conf "verify-client-cert none"
 set_conf "username-as-common-name"
-set_conf "script-security 3"
 
 if [ ! -z "$PUSH_OPTIONS" ]; then
   echo '>> adding push options'
@@ -134,24 +167,6 @@ fi
 echo "> reconfigure server"
 #sed -i '/cert server.crt/c\;cert server.crt' /etc/openvpn/server.conf
 #sed -i '/key server.key/c\;key server.key  # This file should be kept secret' /etc/openvpn/server.conf
-
-echo ">> reconfigure azure-ad config"
-sed -i "s/{{tenant_id}}/$TENANT_ID/" /etc/openvpn/config.yaml
-sed -i "s/{{client_id}}/$CLIENT_ID/" /etc/openvpn/config.yaml
-sed -i "s/{{log_level}}/$HELPER_LOG_LEVEL/" /etc/openvpn/config.yaml
-if [ ! -z "$AD_GROUPS" ]; then
-  grep -q "^permitted_groups:" /etc/openvpn/config.yaml || echo "permitted_groups:" >> /etc/openvpn/config.yaml
-  IFS=',' read -ra groups <<< "$AD_GROUPS"
-  for group in "${groups[@]}"; do
-    echo ">>> Adding group access for '$group'"
-    grep -q -- "- $group" /etc/openvpn/config.yaml || sed -i -e "/^permitted_groups:/a \  - $group" /etc/openvpn/config.yaml
-  done
-fi
-# we also need to make it uses hashlib (err m$..)
-sed -i "s/#import hashlib/import hashlib/" /etc/openvpn/openvpn-azure-ad-auth.py
-sed -i "s/#from hmac import compare_digest/from hmac import compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py
-sed -i "s/^from backports.pbkdf2 import pbkdf2_hmac, compare_digest/#from backports.pbkdf2 import pbkdf2_hmac, compare_digest/" /etc/openvpn/openvpn-azure-ad-auth.py
-sed -i "s/(pbkdf2_hmac(/(hashlib.pbkdf2_hmac(/" /etc/openvpn/openvpn-azure-ad-auth.py
 
 echo ">> openvpn server config: $OPENVPN_CONFIG_FILE"
 [ "$DEBUG" = 'true' ] && cat /etc/openvpn/server.conf
