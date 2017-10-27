@@ -68,7 +68,8 @@ else
   echo "$CA_KEY" > /etc/openvpn/pki/private/ca.key
   chmod 600 /etc/openvpn/pki/private/ca.key
   ln -svf /etc/openvpn/pki/private/ca.key /etc/openvpn/ca.key
-  cat /etc/openvpn/openssl-1.0.cnf
+
+  [ "$DEBUG" = 'true' ] && cat /etc/openvpn/openssl-1.0.cnf
 fi
 
 # Diffie Hellman parameters
