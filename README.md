@@ -11,6 +11,8 @@
 
 :whale: A Docker image for OpenVPN.
 
+## Authentication Overview
+
 Allows different types of authentication to be used:
 
 ### azuread
@@ -41,7 +43,35 @@ Required runtime environments:
 - `ADCHECK_DOMAIN` - AD Domain [required]
 - `ADCHECK_GROUPDN` - AD Group LDAP DN [required]
 
-## Build
+## Usage
+
+### Runtime Environment Variables
+
+There should be a reasonable amount of flexibility using the available variables. If not please raise an issue so your use case can be covered!
+
+- `AUTH_TYPE` - Type of auth to use (azuread, or adcheck) [required]
+- `CA_CERTIFICATE` - TLS/SSL CA certificate (x509) [optional]
+- `DH_PARAMS` - Diffie hellman parameters (providing them speeds up startup time) [optional]
+- `SERVER_CERTIFICATE` - TLS/SSL server certificate (x509) [optional]
+- `SERVER_KEY` - TLS/SSL server key (x509) [optional]
+- `PUSH_OPTIONS` - additional options to push to clients, e.g. `route 10.0.0.0 255.255.255.0,dhcp-option DNS 10.0.0.5` [optional]
+- `PRINT_CLIENT_PROFILE` - print the client .ovpn on startup [optional]
+- `DEBUG` - print out more stuff on startup [optional]
+- `NAT` - set to `true` to enable Network Address Translation on the OpenVPN server to masquerade traffic out of the host [optional]
+- `AZUREAD_CLIENT_ID` - Azure AD Client ID [required for azuread auth]
+- `AZUREAD_TENANT_ID` - Azure AD Tenant ID [required for azuread auth]
+- `AZUREAD_GROUPS` - Comma separated list of Azure AD groups to permit access to (requires app registration to have 'read all groups' access [optional for azuread auth]
+- `ADCHECK_SERVER` - AD Server [required for adcheck auth]
+- `ADCHECK_DOMAIN` - AD Domain [required for adcheck auth]
+- `ADCHECK_GROUPDN` - AD Group LDAP DN [required for adcheck auth]
+
+### GNU Make
+
+For make targets available:
+
+    $ make help
+
+### Build
 
     $ docker build -t flaccid/openvpn:azure-ad .
 
@@ -49,7 +79,11 @@ Or, for RPi:
 
     $ docker build --file Dockerfile.arm32v6 -t flaccid/openvpn:azure-ad .
 
-## Run
+### Push to Docker Hub
+
+    $ docker push flaccid/openvpn:azure-ad
+
+### Run
 
 NOTE: Not yet minimised privileges - it can vary greatly depending on your Docker setup and OS which is why a privileged container makes sense on the practical level (for now).
 
@@ -104,26 +138,6 @@ Full example specifying pre-generated authoritative PKI:
         -e DEBUG=true \
         -p 1194:1194/udp \
           flaccid/openvpn:azure-ad
-
-### Runtime Environment Variables
-
-There should be a reasonable amount of flexibility using the available variables. If not please raise an issue so your use case can be covered!
-
-- `AUTH_TYPE` - Type of auth to use (azuread, or adcheck) [required]
-- `CA_CERTIFICATE` - TLS/SSL CA certificate (x509) [optional]
-- `DH_PARAMS` - Diffie hellman parameters (providing them speeds up startup time) [optional]
-- `SERVER_CERTIFICATE` - TLS/SSL server certificate (x509) [optional]
-- `SERVER_KEY` - TLS/SSL server key (x509) [optional]
-- `PUSH_OPTIONS` - additional options to push to clients, e.g. `route 10.0.0.0 255.255.255.0,dhcp-option DNS 10.0.0.5` [optional]
-- `PRINT_CLIENT_PROFILE` - print the client .ovpn on startup [optional]
-- `DEBUG` - print out more stuff on startup [optional]
-- `NAT` - set to `true` to enable Network Address Translation on the OpenVPN server to masquerade traffic out of the host [optional]
-- `AZUREAD_CLIENT_ID` - Azure AD Client ID [required for azuread auth]
-- `AZUREAD_TENANT_ID` - Azure AD Tenant ID [required for azuread auth]
-- `AZUREAD_GROUPS` - Comma separated list of Azure AD groups to permit access to (requires app registration to have 'read all groups' access [optional for azuread auth]
-- `ADCHECK_SERVER` - AD Server [required for adcheck auth]
-- `ADCHECK_DOMAIN` - AD Domain [required for adcheck auth]
-- `ADCHECK_GROUPDN` - AD Group LDAP DN [required for adcheck auth]
 
 ### PKI Persistence
 
