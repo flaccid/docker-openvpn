@@ -99,7 +99,6 @@ ln -fsv "/etc/openvpn/pki/private/$(hostname -s).key" /etc/openvpn/server.key
 # server certificate
 if [ ! -e "/etc/openvpn/pki/issued/$(hostname -s).crt" ]; then
   echo '> generating server certificate'
-  ls -lahR /etc/openvpn
   #easyrsa import-req "/etc/openvpn/pki/reqs/$(hostname -s).req" "$(hostname -s)"
   easyrsa --batch sign-req server "$(hostname -s)" nopass
 fi
