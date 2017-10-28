@@ -11,11 +11,9 @@ echo "REMOTE_HOST=$REMOTE_HOST"
 echo "REMOTE_PORT=$REMOTE_PORT"
 echo "OPENVPN_CONFIG_FILE=$OPENVPN_CONFIG_FILE"
 echo "AUTH_TYPE=$AUTH_TYPE"
-if [ "$DEBUG" = 'true' ]; then
-  [ ! -z "$CA_CERTIFICATE" ] && echo "CA_CERTIFICATE=$CA_CERTIFICATE"
-  [ ! -z "$CA_KEY" ] && echo "CA_KEY=<hidden>"
-  [ ! -z "$DH_PARAMS" ] && echo "DH_PARAMS=$DH_PARAMS"
-fi
+[ ! -z "$CA_CERTIFICATE" ] && echo "CA_CERTIFICATE=$CA_CERTIFICATE"
+[ ! -z "$CA_KEY" ] && echo "CA_KEY=<hidden>"
+[ ! -z "$DH_PARAMS" ] && echo "DH_PARAMS=<hidden>"
 
 export PATH="$PATH:/usr/share/easy-rsa"
 
