@@ -6,15 +6,12 @@ machine:
 
 jobs:
   build:
-    docker:
-      - image: flaccid/openvpn:azure-ad
+    branches:
+      only:
+        - azure-ad
     steps:
       - checkout
-      - docker info
-      - docker build -t flaccid/openvpn:azure-ad .
-    deployment:
-      hub:
-        branch: azure-ad
-        commands:
-          - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-          - docker push flaccid/openvpn:azure-ad
+      - run: docker info
+      - run: docker build -t flaccid/openvpn:azure-ad .
+      - run: docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - run: docker push flaccid/openvpn:azure-ad
