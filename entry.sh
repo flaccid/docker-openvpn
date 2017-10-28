@@ -39,7 +39,6 @@ if [ -z "$CA_CERTIFICATE" ]; then
     easyrsa --batch build-ca nopass
 
     echo '> generating server pki'
-    [ "$DEBUG" = 'true' ] && ls -l /etc/openvpn/pki
     # can't find a way to do this non-interactive (use build-server-full instead)
     # easyrsa --batch gen-req "$(hostname -s)" nopass
     # easyrsa show-req "$(hostname -s)"
@@ -68,8 +67,6 @@ else
   echo "$CA_KEY" > /etc/openvpn/pki/private/ca.key
   chmod 600 /etc/openvpn/pki/private/ca.key
   ln -svf /etc/openvpn/pki/private/ca.key /etc/openvpn/ca.key
-
-  [ "$DEBUG" = 'true' ] && cat /etc/openvpn/openssl-1.0.cnf
 fi
 
 # Diffie Hellman parameters
