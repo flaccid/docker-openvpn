@@ -20,7 +20,7 @@ jobs:
           command: |
             docker build -t flaccid/openvpn:azure-ad .
       - deploy:
-          name: Push to Docker Hub
+          name: Push docker image to Docker Hub
           command: |
             docker login --username=$DOCKER_USER --password=$DOCKER_PASSWORD
             docker push flaccid/openvpn:azure-ad
