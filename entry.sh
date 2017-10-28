@@ -4,6 +4,7 @@
 : ${REMOTE_PORT:=1194}
 : ${OPENVPN_CONFIG_FILE:=/etc/openvpn/server.conf}
 : ${AUTH_TYPE:=none}
+: ${PRINT_OPENSSL_CONF:=false}
 
 echo "REMOTE_HOST=$REMOTE_HOST"
 echo "REMOTE_PORT=$REMOTE_PORT"
@@ -52,7 +53,7 @@ if [ -z "$CA_CERTIFICATE" ]; then
       easyrsa build-server-full "$(hostname -s)" nopass
     fi
   else
-    echo '> seems you already have a CA at /etc/openvpn/pki/ca.crt'
+    echo '> seems you already have a CA certificate at /etc/openvpn/pki/ca.crt'
   fi
 else
   if [ "$EUID" -ne 0 ]; then
