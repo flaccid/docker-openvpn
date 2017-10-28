@@ -5,7 +5,6 @@ jobs:
       - image: flaccid/openvpn:azure-ad
     steps:
       - checkout
-      - run: pip install -r requirements/dev.txt
 
 version: 2
 machine:
