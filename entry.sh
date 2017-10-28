@@ -6,6 +6,7 @@
 : ${AUTH_TYPE:=none}
 : ${PRINT_OPENSSL_CONF:=false}
 
+# bootstrap main variables feedback
 echo "REMOTE_HOST=$REMOTE_HOST"
 echo "REMOTE_PORT=$REMOTE_PORT"
 echo "OPENVPN_CONFIG_FILE=$OPENVPN_CONFIG_FILE"
@@ -68,7 +69,7 @@ else
   echo 'saving provided CA key to /etc/openvpn/pki/private/ca.key'
   echo "$CA_KEY" > /etc/openvpn/pki/private/ca.key
   chmod 600 /etc/openvpn/pki/private/ca.key
-  ln -svf /etc/openvpn/pki/private/ca.key /etc/openvpn/ca.key
+  ln -sf /etc/openvpn/pki/private/ca.key /etc/openvpn/ca.key
 fi
 
 # Diffie Hellman parameters
