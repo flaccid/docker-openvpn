@@ -6,6 +6,8 @@ machine:
 
 jobs:
   build:
+    docker:
+      - image: alpine
     branches:
       only:
         - azure-ad
