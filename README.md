@@ -51,6 +51,7 @@ There should be a reasonable amount of flexibility using the available variables
 
 - `AUTH_TYPE` - Type of auth to use (azuread, or adcheck) [required]
 - `CA_CERTIFICATE` - TLS/SSL CA certificate (x509) [optional]
+- `CA_KEY` - TLS/SSL CA key (x509) [optional]
 - `DH_PARAMS` - Diffie hellman parameters (providing them speeds up startup time) [optional]
 - `SERVER_CERTIFICATE` - TLS/SSL server certificate (x509) [optional]
 - `SERVER_KEY` - TLS/SSL server key (x509) [optional]
