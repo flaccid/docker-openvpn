@@ -15,11 +15,11 @@ jobs:
       - checkout
       - setup_remote_docker
       - run: docker info
-      - build:
+      - run:
           name: Build docker image
           command: |
             docker build -t flaccid/openvpn:azure-ad .
-      - push:
+      - deploy:
           name: Push to Docker Hub
           command: |
             docker login --username=\"$DOCKER_USER\" --password=\"$DOCKER_PASS\"
