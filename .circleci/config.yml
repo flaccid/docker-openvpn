@@ -22,5 +22,5 @@ jobs:
       - deploy:
           name: Push to Docker Hub
           command: |
-            docker login --username=\"$DOCKER_USER\" --password=\"$DOCKER_PASS\"
+            docker login --username=$DOCKER_USER --password=$DOCKER_PASSWORD
             docker push flaccid/openvpn:azure-ad
