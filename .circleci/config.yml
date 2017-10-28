@@ -7,7 +7,7 @@ machine:
 jobs:
   build:
     docker:
-      - image: alpine
+      - image: docker
     branches:
       only:
         - azure-ad
