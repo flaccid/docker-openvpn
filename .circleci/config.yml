@@ -1,24 +1,20 @@
 version: 2
+
+machine:
+  services:
+    - docker
+
 jobs:
   build:
     docker:
       - image: flaccid/openvpn:azure-ad
     steps:
       - checkout
-
-version: 2
-machine:
-  services:
-    - docker
-
-build:
-  override:
-    - docker info
-    - docker build --rm=false -t flaccid/openvpn:azure-ad .
-
-deployment:
-  hub:
-    branch: azure-ad
-    commands:
-      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker push flaccid/openvpn:azure-ad
+      - docker info
+      - docker build -t flaccid/openvpn:azure-ad .
+    deployment:
+      hub:
+        branch: azure-ad
+        commands:
+          - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+          - docker push flaccid/openvpn:azure-ad
