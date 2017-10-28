@@ -1,9 +1,18 @@
 version: 2
+jobs:
+  build:
+    docker:
+      - image: flaccid/openvpn:azure-ad
+    steps:
+      - checkout
+      - run: pip install -r requirements/dev.txt
+
+version: 2
 machine:
   services:
     - docker
 
-dependencies:
+build:
   override:
     - docker info
     - docker build --rm=false -t flaccid/openvpn:azure-ad .
