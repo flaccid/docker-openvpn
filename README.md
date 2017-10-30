@@ -24,9 +24,15 @@ Once setup, you can grant permissions in required permissions in the app registr
 The grant/consent can be done per user or by an admin to consent for all users.
 If you want to make use of $AUTH_GROUPS for access control, the App Registration will also need "Read all groups" access and to have an admin Grant Permissions for it.
 
-Required runtime environments:
+Required runtime environments (and where to get them):
 - `AZUREAD_CLIENT_ID` - Azure AD Client ID [required]
+
+  <i>Azure Active Directory -> [your directory] -> App Registrations -> [your app registration] -> Application ID</i>
+
 - `AZUREAD_TENANT_ID` - Azure AD Tenant ID [required]
+
+  <i>Azure Active Directory -> [your directory] -> Properties -> Directory ID</i>
+
 Optional runtime environments:
 - `AZUREAD_GROUPS` - Comma separated list of Azure AD groups to permit access to (requires app registration to have 'read all groups' access [optional]
 
