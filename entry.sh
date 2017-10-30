@@ -5,6 +5,7 @@
 : ${OPENVPN_CONFIG_FILE:=/etc/openvpn/server.conf}
 : ${AUTH_TYPE:=none}
 : ${PRINT_OPENSSL_CONF:=false}
+: ${NAT_ENABLE:=false}
 
 # bootstrap main variables feedback
 echo "REMOTE_HOST=$REMOTE_HOST"
