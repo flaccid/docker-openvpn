@@ -56,7 +56,7 @@ There should be a reasonable amount of flexibility using the available variables
 - `SERVER_CERTIFICATE` - TLS/SSL server certificate (x509) [optional]
 - `SERVER_KEY` - TLS/SSL server key (x509) [optional]
 - `PUSH_OPTIONS` - additional options to push to clients, e.g. `route 10.0.0.0 255.255.255.0,dhcp-option DNS 10.0.0.5` [optional]
-- `PRINT_CLIENT_PROFILE` - print the client .ovpn on startup [optional]
+- `PRINT_CLIENT_PROFILE` - print the client .ovpn on startup (`true` to enable) [optional]
 - `DEBUG` - print out more stuff on startup [optional]
 - `NAT` - set to `true` to enable Network Address Translation on the OpenVPN server to masquerade traffic out of the host [optional]
 - `AZUREAD_CLIENT_ID` - Azure AD Client ID [required for azuread auth]
