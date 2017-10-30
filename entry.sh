@@ -203,9 +203,8 @@ ln -fsv /etc/openvpn/pki/ca.crt /etc/openvpn/ca.crt
 if [ "$NAT_ENABLE" = 'true' ]; then
   echo '> set-up NAT with iptables'
   net=$(awk '/^server/ {print $2"/"$3}' ${OPENVPN_CONFIG_FILE})
-  echo ">> for $net"
   eth="$(ip route | awk '/^default/ {print $5}' | head -n1)"
-  echo ">> on interface $eth"
+  echo ">> for $net on interface $eth"
   cmd="iptables -t nat -A POSTROUTING -s ${net} -o ${eth} -j MASQUERADE"
   echo "$cmd" && eval "$cmd"
 fi
