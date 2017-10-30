@@ -185,6 +185,7 @@ echo "> append CA cert to client profile"
 echo '<ca>' >> /etc/openvpn/client.ovpn
 cat /etc/openvpn/pki/ca.crt >> /etc/openvpn/client.ovpn
 echo '</ca>' >> /etc/openvpn/client.ovpn
+cp -f /etc/openvpn/client.ovpn "/etc/openvpn/$REMOTE_HOST.ovpn"
 [ "$PRINT_CLIENT_PROFILE" = 'true' ] && echo '>> print client profile' && cat /etc/openvpn/client.ovpn
 
 echo '> linking pki'
