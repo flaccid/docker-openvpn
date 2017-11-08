@@ -191,6 +191,8 @@ case "$REMOTE_PROTO" in
       sed -i -e '/udp/s/^/;/g' /etc/openvpn/server.conf
       sed -i -e '/tcp/s/^;//g' /etc/openvpn/server.conf
       sed -i -e '/proto tcp/s/;//g' /etc/openvpn/server.conf
+      # explicit-exit-notify can only be used with udp proto
+      sed -i -e '/explicit-exit-notify/s/^/;/g' /etc/openvpn/server.conf
       ;;
 esac
 echo 'auth-user-pass' >> /etc/openvpn/client.conf
