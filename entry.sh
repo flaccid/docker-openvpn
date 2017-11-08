@@ -180,11 +180,17 @@ case "$REMOTE_PROTO" in
       sed -i -e '/tcp/s/^/;/g' /etc/openvpn/client.conf
       sed -i -e '/udp/s/^;//g' /etc/openvpn/client.conf
       sed -i -e '/proto udp/s/;//g' /etc/openvpn/client.conf
+      sed -i -e '/tcp/s/^/;/g' /etc/openvpn/server.conf
+      sed -i -e '/udp/s/^;//g' /etc/openvpn/server.conf
+      sed -i -e '/proto udp/s/;//g' /etc/openvpn/server.conf
       ;;
    tcp)
       sed -i -e '/udp/s/^/;/g' /etc/openvpn/client.conf
       sed -i -e '/tcp/s/^;//g' /etc/openvpn/client.conf
       sed -i -e '/proto tcp/s/;//g' /etc/openvpn/client.conf
+      sed -i -e '/udp/s/^/;/g' /etc/openvpn/server.conf
+      sed -i -e '/tcp/s/^;//g' /etc/openvpn/server.conf
+      sed -i -e '/proto tcp/s/;//g' /etc/openvpn/server.conf
       ;;
 esac
 echo 'auth-user-pass' >> /etc/openvpn/client.conf
