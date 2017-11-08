@@ -12,6 +12,6 @@ services:
     stdin_open: true
     tty: true
     ports:
-    - 1194:1194/udp
+    - 1194:1194
     labels:
       io.rancher.container.pull_image: always
