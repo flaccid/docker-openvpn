@@ -63,7 +63,7 @@ There should be a reasonable amount of flexibility using the available variables
 - `SERVER_KEY` - TLS/SSL server key (x509) [optional]
 - `REMOTE_HOST` - Host/IP expected for clients to connect to the server with [recommended]
 - `REMOTE_PORT` - Remote port for clients to connect to the server with [recommended]
-- 'REMOTE_PROTO' - Protocol for the server to use [optional - `udp`|`tdp`, default `udp`]
+- `REMOTE_PROTO` - Protocol for the server to use [optional - `udp`|`tdp`, default `udp`]
 - `PUSH_OPTIONS` - additional options to push to clients, e.g. `route 10.0.0.0 255.255.255.0,dhcp-option DNS 10.0.0.5` [optional]
 - `PRINT_CLIENT_PROFILE` - print the client .ovpn on startup (`true` to enable) [optional]
 - `DEBUG` - print out more stuff on startup [optional]
