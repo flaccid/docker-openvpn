@@ -9,7 +9,8 @@ ENV DEBUG=false \
     PRINT_OPENVPN_CONFIG=false \
     PRINT_CA_CERT=false \
     REMOTE_HOST=127.0.0.1 \
-    REMOTE_PORT=1194
+    REMOTE_PORT=1194 \
+    REMOTE_PROTO=udp
 
 ADD https://raw.githubusercontent.com/outlook/openvpn-azure-ad-auth/master/requirements.txt /tmp/requirements.txt
 
@@ -70,7 +71,7 @@ RUN cp /usr/share/easy-rsa/vars.example /etc/openvpn/vars && \
 
 VOLUME ["/etc/openvpn"]
 
-EXPOSE 1194/udp
+EXPOSE 1194
 
 WORKDIR /etc/openvpn
 

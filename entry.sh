@@ -2,6 +2,7 @@
 
 : ${REMOTE_HOST:=127.0.0.1}
 : ${REMOTE_PORT:=1194}
+: ${REMOTE_PROTO:=udp}
 : ${OPENVPN_CONFIG_FILE:=/etc/openvpn/server.conf}
 : ${AUTH_TYPE:=none}
 : ${PRINT_OPENSSL_CONF:=false}
@@ -10,6 +11,7 @@
 # bootstrap main variables feedback
 echo "REMOTE_HOST=$REMOTE_HOST"
 echo "REMOTE_PORT=$REMOTE_PORT"
+echo "REMOTE_PROTO=$PROTO"
 echo "OPENVPN_CONFIG_FILE=$OPENVPN_CONFIG_FILE"
 echo "AUTH_TYPE=$AUTH_TYPE"
 [ ! -z "$CA_CERTIFICATE" ] && echo "CA_CERTIFICATE=$CA_CERTIFICATE"
@@ -173,6 +175,18 @@ echo ">> openvpn server config: $OPENVPN_CONFIG_FILE"
 
 echo "> reconfigure client config"
 sed -i "s/remote my-server-1 1194/remote $REMOTE_HOST $REMOTE_PORT/" /etc/openvpn/client.conf
+case "$REMOTE_PROTO" in
+  udp)
+      sed -i -e '/tcp/s/^/;/g' /etc/openvpn/client.conf
+      sed -i -e '/udp/s/^;//g' /etc/openvpn/client.conf
+      sed -i -e '/proto udp/s/;//g' /etc/openvpn/client.conf
+      ;;
+   tcp)
+      sed -i -e '/udp/s/^/;/g' /etc/openvpn/client.conf
+      sed -i -e '/tcp/s/^;//g' /etc/openvpn/client.conf
+      sed -i -e '/proto tcp/s/;//g' /etc/openvpn/client.conf
+      ;;
+esac
 echo 'auth-user-pass' >> /etc/openvpn/client.conf
 # cancel out the client pki usage
 sed -i 's/ca ca.crt/;ca ca.crt/' /etc/openvpn/client.conf
