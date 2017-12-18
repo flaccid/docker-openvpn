@@ -19,10 +19,14 @@ Allows different types of authentication to be used:
 
 Azure AD version uses the upstream helper script,  https://github.com/outlook/openvpn-azure-ad-auth.
 
-You'll need to set up an App Registration in Azure AD.  It only needs the default "Sign in and read user profile" permission for standard authentication.
-Once setup, you can grant permissions in required permissions in the app registration in the portal or run `/etc/openvpn/openvpn-azure-ad-auth.py --consent` inside the container
+You'll need to set up an App Registration in Azure AD (under the directory you are using). It only needs the default "Sign in and read user profile" permission for standard authentication.
+
+Once setup, you can grant permissions in required permissions in the app registration in the portal or run `/etc/openvpn/openvpn-azure-ad-auth.py --consent` inside the container.
+
+Before you run the command, export your Azure `username` and `password` to the environment, then follow the link in the stdout, it should read something like `To sign in, use a web browser to open the page https://aka.ms/devicelogin and enter the code HJW9PMABC to authenticate.`.
+
 The grant/consent can be done per user or by an admin to consent for all users.
-If you want to make use of $AUTH_GROUPS for access control, the App Registration will also need "Read all groups" access and to have an admin Grant Permissions for it.
+If you want to make use of `$AUTH_GROUPS` for access control, the App Registration will also need "Read all groups" access and to have an admin Grant Permissions for it.
 
 Required runtime environments (and where to get them):
 - `AZUREAD_CLIENT_ID` - Azure AD Client ID [required]
