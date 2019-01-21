@@ -5,6 +5,7 @@ openvpn.env
 client.conf
 *.pem
 *.key
+.env
 
 docker-compose-local.yml
 rancher-compose-local.yml
