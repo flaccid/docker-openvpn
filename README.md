@@ -105,8 +105,8 @@ Practical usage with authentication against Azure AD:
 
     $ docker run -it --privileged \
         -e AUTH_TYPE="azuread" \
-        -e AZUREAD_CLIENT_ID="$CLIENT_ID" \
-        -e AZUREAD_TENANT_ID="$TENANT_ID" \
+        -e AZUREAD_CLIENT_ID="$AZUREAD_CLIENT_ID" \
+        -e AZUREAD_TENANT_ID="$AZUREAD_TENANT_ID" \
         -e PRINT_CLIENT_PROFILE=true \
          -p 1194:1194/udp \
           flaccid/openvpn:azure-ad
@@ -126,8 +126,8 @@ Persist your existing CA certificate, plus add debug mode:
 
     $ docker run -it --privileged \
         -e AUTH_TYPE="azuread" \
-        -e AZUREAD_CLIENT_ID="$CLIENT_ID" \
-        -e AZUREAD_TENANT_ID="$TENANT_ID" \
+        -e AZUREAD_CLIENT_ID="$AZUREAD_CLIENT_ID" \
+        -e AZUREAD_TENANT_ID="$AZUREAD_TENANT_ID" \
         -e CA_CERTIFICATE="$CA_CERTIFICATE" \
         -e DEBUG=true \
         -e PRINT_CLIENT_PROFILE=true \
@@ -140,8 +140,8 @@ Full example specifying pre-generated authoritative PKI:
 
     $ docker run -it --privileged \
         -e AUTH_TYPE="azuread" \
-        -e AZUREAD_CLIENT_ID="$CLIENT_ID" \
-        -e AZUREAD_TENANT_ID="$TENANT_ID" \
+        -e AZUREAD_CLIENT_ID="$AZUREAD_CLIENT_ID" \
+        -e AZUREAD_TENANT_ID="$AZUREAD_TENANT_ID" \
         -e CA_CERTIFICATE="$CA_CERTIFICATE" \
         -e CA_KEY="$CA_KEY" \
         -e DH_PARAMS="$DH_PARAMS" \
